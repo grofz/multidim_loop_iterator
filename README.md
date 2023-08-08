@@ -5,6 +5,28 @@ customizable lower bounds, upper bounds, and strides for each dimension. It
 simplifies the process of iterating over multi-dimensional arrays by
 abstracting the complexities of nested loops.
 
+## Motivation
+
+To traverse items of a multidimensional array, nested loops are usualy used
+in the following manner:
+
+```fortran
+do i1 = ...
+  do i2 = ...
+    do i3 = ...
+      do i4 = ...
+        :
+      end do
+    end do
+  end do
+end do
+```
+
+Although this approach is fine in two or three dimensions, it becomes
+unfeasible for higher dimensions. The purpose of this module is to
+avoid these nested loops and provide a more efficient and elegant
+solution for multidimensional array traversal.
+
 ## Usage
 
 1. File `loop.f90` provides a module `loop_mod` that can be used in your
@@ -35,6 +57,7 @@ the loop.
 
 
 ## Example
+
 
 Here is a simple example of using the `loop_mod` iterator:
 
