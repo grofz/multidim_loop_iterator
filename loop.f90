@@ -5,7 +5,8 @@ module loop_mod
   type, public :: loop_iterator_t
     private
     integer :: ndims
-    integer, allocatable, dimension(:) :: lbounds, ubounds, strides, indices
+    integer, allocatable, dimension(:) :: &
+        lbounds, maxcycles, cycles, strides, indices
     logical :: has_next = .false.
   contains
     procedure :: get_next_element
@@ -18,13 +19,13 @@ module loop_mod
 contains
 
   function get_next_element(this) result(indices)
+    !! Return actual element and update iterator to point to the
+    !! next element
     class(loop_iterator_t), intent(inout) :: this
     integer :: indices(this%ndims)
 
     integer :: d
 
-    ! Return actual element and update iterator to point to the
-    ! next element
     if (.not. this%has_next) &
         error stop 'iterator does not have next element'
 
@@ -35,9 +36,11 @@ contains
     ! back to its full size by lower bound indices.
     d = 1
     do
-      if (this%indices(d)+this%strides(d) <= this%ubounds(d)) then
+      if (this%cycles(d) < this%maxcycles(d)) then
         this%indices(d) = this%indices(d) + this%strides(d)
+        this%cycles(d) = this%cycles(d) + 1
         this%indices(:d-1) = this%lbounds(:d-1)
+        this%cycles(:d-1) = 1
         exit
       else
         d = d + 1
@@ -67,17 +70,19 @@ contains
     new%ndims = size(lbounds)
     ! explicit allocation just to avoid -Wunitialized warning of gfortran
     allocate(new%lbounds(size(lbounds)))
-    allocate(new%ubounds(size(lbounds)))
+    allocate(new%cycles(size(lbounds)))
+    allocate(new%maxcycles(size(lbounds)))
     allocate(new%strides(size(lbounds)))
     allocate(new%indices(size(lbounds)))
     new%lbounds = lbounds
-    new%ubounds = ubounds
     new%strides = strides
 
     new%indices = lbounds
+    new%cycles = 1
     ! Cf. the formula for the number of iterations for a do loop
     ! e.g. in "Modern Fortran Explained, Sec 4.4."
-    new%has_next = all(max(0, (ubounds-lbounds+strides)/strides)>0)
+    new%maxcycles = max(0, (ubounds-lbounds+strides)/strides)
+    new%has_next = all(new%cycles<=new%maxcycles)
   end function new_iterator
 
 end module loop_mod
