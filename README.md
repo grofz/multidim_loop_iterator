@@ -83,6 +83,9 @@ Another example in file `example.f90` showcases the capabilities of the
 `loop_mod` module. It iterates through dimensions and calculates the count of
 k-th closest neighbours of an n-dimensional hypercube.
 
+Example `example3.f90` illustrates the iteration over all neighbours
+of a particular array element with out-of-bounds checks.
+
 A simple script to build these examples is provided. The script assumes the
 `gfortran` compiler is available.
 
